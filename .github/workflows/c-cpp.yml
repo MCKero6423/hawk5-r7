@@ -40,3 +40,4 @@ jobs:
         files: |
           bin/firmware.bin
           bin/firmware.packed.bin
+          bin/firmware
