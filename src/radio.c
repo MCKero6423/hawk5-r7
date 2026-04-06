@@ -316,15 +316,14 @@ static TXStatus checkTX(VFOContext *ctx) {
   if (gRadioState) {
     for (uint8_t i = 0; i < gRadioState->num_vfos; ++i) {
       ExtendedVFOContext *vfoCtx = &gRadioState->vfos[i];
-      if (&vfoCtx->context != ctx) {
-        continue;
+      if (&vfoCtx->context == ctx) {
+        if (vfoCtx->mode == MODE_CHANNEL) {
+          CH ch = {0};
+          CHANNELS_Load(vfoCtx->channel_index, &ch);
+          allowTx = ch.allowTx;
+        }
+        break;
       }
-      if (vfoCtx->mode == MODE_CHANNEL) {
-        CH ch;
-        CHANNELS_Load(vfoCtx->channel_index, &ch);
-        allowTx = ch.allowTx;
-      }
-      break;
     }
   }
 
