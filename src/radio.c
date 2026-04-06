@@ -309,11 +309,28 @@ static TXStatus checkTX(VFOContext *ctx) {
     return TX_DISABLED;
   }
 
-  /* Band txBand = BANDS_ByFrequency(txF);
+  uint32_t txF = getRealTxFreq(ctx);
+  Band txBand = BANDS_ByFrequency(txF);
+  bool allowTx = txBand.allowTx;
 
-  if (!txBand.allowTx && !(RADIO_IsChMode() && radio->allowTx)) {
+  if (gRadioState) {
+    for (uint8_t i = 0; i < gRadioState->num_vfos; ++i) {
+      ExtendedVFOContext *vfoCtx = &gRadioState->vfos[i];
+      if (&vfoCtx->context != ctx) {
+        continue;
+      }
+      if (vfoCtx->mode == MODE_CHANNEL) {
+        CH ch;
+        CHANNELS_Load(vfoCtx->channel_index, &ch);
+        allowTx = ch.allowTx;
+      }
+      break;
+    }
+  }
+
+  if (!allowTx) {
     return TX_DISABLED;
-  } */
+  }
 
   if (gBatteryPercent == 0) {
     return TX_BAT_LOW;
