@@ -3,6 +3,8 @@ name: C/C++ CI
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - "v*"
   pull_request:
     branches: [ "main" ]
 
@@ -10,6 +12,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
@@ -18,7 +22,7 @@ jobs:
     - name: install build tool
       run: sudo apt-get install gcc-arm-none-eabi
     - name: install crcmod
-      run: pip install crcmod
+      run: python3 -m pip install crcmod
     - name: make
       run: make
     - name: Archive
@@ -27,4 +31,12 @@ jobs:
         name: build-artifact
         path: |
           bin/firmware.bin
+          bin/firmware.packed.bin
           bin/firmware
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          bin/firmware.bin
+          bin/firmware.packed.bin
